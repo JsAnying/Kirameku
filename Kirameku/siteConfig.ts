@@ -3,7 +3,7 @@
 export const siteConfig = {
   // 网站标题与博主信息
   title: "JsAnyingの小站",
-  url: "http://121.41.197.134",
+  url: "https://zhfjsay.me",
   authorName: "JsAnying",
   bio: "项目开源在 GitHub,点击下面的GitHub图标跳转,欢迎 star 和 fork！(◕‿◕)",
 
@@ -30,7 +30,7 @@ export const siteConfig = {
 
   // 云音乐配置（网易云音乐）
   // 填歌单 ID 则自动拉取整个歌单，填歌曲 ID 列表则只播放指定歌曲
-  cloudMusicPlaylistId: "17943739323",  // 歌单 ID（优先）
+  cloudMusicPlaylistId: "18550574978",  // 歌单 ID（优先）
   cloudMusicIds: [],                     // 歌曲 ID 列表（歌单为空时使用）
 
   // 后端 API 地址（留空，开发通过 next.config.ts rewrites 代理，生产通过 Nginx 反代）
@@ -38,27 +38,27 @@ export const siteConfig = {
 
   // 社交链接
   social: {
-    github: "https://github.com/Xinghongia/Kirameku",
-    gitee: "https://gitee.com/hongzyh",
-    google: "mailto:guh982719@gmail.com",
-    email: "your.email@example.com",
-    qq: "123456789",
-    wechat: "your_wechat_id",
+    github: "https://github.com/JsAnying",
+    gitee: "",
+    google: "dzhen9415@gmail.com",
+    email: "1628083088@qq.com",
+    qq: "1638083088",
+    wechat: "Sion_Eden-",
   },
 
   // 站点信息
-  buildDate: "2026-05-07T12:00:00",
+  buildDate: "2026-11-01T00:00:00+08:00",
   footerBadges: [
     { name: "Next.js 15", color: "text-sky-500" },
     { name: "React 19", color: "text-cyan-400" },
     { name: "Tailwind 4", color: "text-teal-400" },
   ],
   icpConfig: {
-    name: "赣ICP备2025078417号",
+    name: "",
     link: "https://beian.miit.gov.cn/",
   },
   moeIcpConfig: {
-    name: "萌ICP备20260527号",
+    name: "",
     link: "https://icp.gov.moe/?keyword=20260527",
   },
 
@@ -66,4 +66,3 @@ export const siteConfig = {
   chatterTitle: "留言",
   chatterDescription: "生活、技术、随想的碎片记录",
 };
-
