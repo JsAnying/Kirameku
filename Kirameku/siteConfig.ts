@@ -2,9 +2,9 @@
 
 export const siteConfig = {
   // 网站标题与博主信息
-  title: "Starhiroの小站",
-  url: "https://boke.hiromu.top",
-  authorName: "Starhiro",
+  title: "JsAnyingの小站",
+  url: "http://47.93.120.87",
+  authorName: "JsAnying",
   bio: "项目开源在 GitHub,点击下面的GitHub图标跳转,欢迎 star 和 fork！(◕‿◕)",
 
   // 头像设置
@@ -66,3 +66,4 @@ export const siteConfig = {
   chatterTitle: "留言",
   chatterDescription: "生活、技术、随想的碎片记录",
 };
+
