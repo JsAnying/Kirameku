@@ -33,6 +33,7 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
+      { protocol: "https", hostname: "only-myweb.oss-cn-beijing.aliyuncs.com" },
       { protocol: "https", hostname: "static.hiromu.top" },
       { protocol: "https", hostname: "hiromu520.oss-cn-beijing.aliyuncs.com" },
       { protocol: "https", hostname: "picsum.photos" },
@@ -43,3 +44,4 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
