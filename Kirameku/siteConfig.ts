@@ -3,7 +3,7 @@
 export const siteConfig = {
   // 网站标题与博主信息
   title: "JsAnyingの小站",
-  url: "http://47.93.120.87",
+  url: "http://121.41.197.134",
   authorName: "JsAnying",
   bio: "项目开源在 GitHub,点击下面的GitHub图标跳转,欢迎 star 和 fork！(◕‿◕)",
 
