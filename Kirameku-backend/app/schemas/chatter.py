@@ -1,6 +1,8 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.utils.media import ImageUrl
+
 
 class GitHubUserOut(BaseModel):
     id: int
@@ -11,14 +13,14 @@ class GitHubUserOut(BaseModel):
 
 class ChatterCreate(BaseModel):
     content: str
-    images: list[str] = []
+    images: list[ImageUrl] = []
     mood: str = ""
     status: str = "draft"
 
 
 class ChatterUpdate(BaseModel):
     content: str | None = None
-    images: list[str] | None = None
+    images: list[ImageUrl] | None = None
     mood: str | None = None
     status: str | None = None
 
@@ -26,7 +28,7 @@ class ChatterUpdate(BaseModel):
 class ChatterOut(BaseModel):
     id: int
     content: str
-    images: list[str] = []
+    images: list[ImageUrl] = []
     mood: str
     likes: int
     comments_count: int

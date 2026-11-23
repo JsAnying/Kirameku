@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Loader2 } from "lucide-react";
 import PostCard, { type PostOut } from "@/components/posts/PostCard";
@@ -14,6 +14,7 @@ export default function PostsPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const pageSize = 12;
+  const requestId = useRef(0);
 
   // 获取分类
   useEffect(() => {
@@ -25,9 +26,17 @@ export default function PostsPage() {
       .catch(() => {});
   }, []);
 
-  // 获取文章
+  // Ignore responses from an older category or an unmounted page.
   useEffect(() => {
-    queueMicrotask(() => setLoading(true));
+    const id = ++requestId.current;
+    queueMicrotask(() => {
+      if (requestId.current === id) {
+        setLoading(true);
+        setPosts([]);
+        setPage(1);
+        setHasMore(true);
+      }
+    });
     getPosts({
       status: "published",
       page: 1,
@@ -35,16 +44,19 @@ export default function PostsPage() {
       ...(activeCategory ? { category: activeCategory } : {}),
     })
       .then((data) => {
+        if (requestId.current !== id) return;
         setPosts(data);
         setHasMore(data.length === pageSize);
       })
-      .catch(() => { setPosts([]); })
-      .finally(() => { setLoading(false); });
+      .catch(() => { if (requestId.current === id) setPosts([]); })
+      .finally(() => { if (requestId.current === id) setLoading(false); });
+    return () => { requestId.current++; };
   }, [activeCategory, pageSize]);
 
   const handleLoadMore = () => {
+    if (loading) return;
+    const id = requestId.current;
     const next = page + 1;
-    setPage(next);
     setLoading(true);
     getPosts({
       status: "published",
@@ -53,11 +65,13 @@ export default function PostsPage() {
       ...(activeCategory ? { category: activeCategory } : {}),
     })
       .then((data) => {
+        if (requestId.current !== id) return;
         setPosts((prev) => [...prev, ...data]);
+        setPage(next);
         setHasMore(data.length === pageSize);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (requestId.current === id) setLoading(false); });
   };
 
   return (

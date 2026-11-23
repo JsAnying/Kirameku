@@ -136,6 +136,9 @@ def delete_chatter(session: Session, chatter_id: int):
 
 
 def get_chatter_comments(session: Session, chatter_id: int) -> list[dict]:
+    chatter = session.get(Chatter, chatter_id)
+    if not chatter or chatter.status != "published":
+        raise HTTPException(404, "说说不存在")
     rows = list(
         session.exec(
             select(ChatterComment)
@@ -168,11 +171,11 @@ def create_chatter_comment(
 
     if data.parent_id:
         parent = session.get(ChatterComment, data.parent_id)
-        if not parent:
+        if not parent or parent.chatter_id != data.chatter_id or parent.status != "approved":
             raise HTTPException(404, "被回复的评论不存在")
 
     c = session.get(Chatter, data.chatter_id)
-    if not c:
+    if not c or c.status != "published":
         raise HTTPException(status_code=404, detail="说说不存在")
 
     comment = ChatterComment(
@@ -184,8 +187,7 @@ def create_chatter_comment(
     )
     session.add(comment)
     session.flush()
-    c.comments_count += 1
-    session.add(c)
+    _update_comment_count(session, data.chatter_id)
     session.commit()
     session.refresh(comment)
     return _comment_to_dict(session, comment)
@@ -206,12 +208,26 @@ def get_chatter_comments_admin(
     return [_comment_to_dict(session, c, include_ip=True, fetch_replies=True) for c in rows]
 
 
+def _update_comment_count(session: Session, chatter_id: int):
+    chatter = session.get(Chatter, chatter_id)
+    if chatter:
+        chatter.comments_count = session.exec(
+            select(func.count(ChatterComment.id)).where(
+                ChatterComment.chatter_id == chatter_id,
+                ChatterComment.status == "approved",
+            )
+        ).one()
+        session.add(chatter)
+
+
 def update_chatter_comment_status(session: Session, comment_id: int, status: str) -> dict:
     comment = session.get(ChatterComment, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="评论不存在")
     comment.status = status
     session.add(comment)
+    session.flush()
+    _update_comment_count(session, comment.chatter_id)
     session.commit()
     session.refresh(comment)
     return _comment_to_dict(session, comment)
@@ -221,13 +237,16 @@ def delete_chatter_comment(session: Session, comment_id: int):
     comment = session.get(ChatterComment, comment_id)
     if not comment:
         raise HTTPException(status_code=404, detail="评论不存在")
+    chatter_id = comment.chatter_id
     session.delete(comment)
+    session.flush()
+    _update_comment_count(session, chatter_id)
     session.commit()
 
 
 def toggle_like(session: Session, chatter_id: int, unlike: bool = False) -> dict:
     c = session.get(Chatter, chatter_id)
-    if not c:
+    if not c or c.status != "published":
         raise HTTPException(404, "说说不存在")
     c.likes = max(0, c.likes + (-1 if unlike else 1))
     session.add(c)
@@ -238,7 +257,10 @@ def toggle_like(session: Session, chatter_id: int, unlike: bool = False) -> dict
 
 def toggle_comment_like(session: Session, comment_id: int, unlike: bool = False) -> dict:
     c = session.get(ChatterComment, comment_id)
-    if not c:
+    if not c or c.status != "approved":
+        raise HTTPException(404, "评论不存在")
+    chatter = session.get(Chatter, c.chatter_id)
+    if not chatter or chatter.status != "published":
         raise HTTPException(404, "评论不存在")
     c.likes = max(0, c.likes + (-1 if unlike else 1))
     session.add(c)

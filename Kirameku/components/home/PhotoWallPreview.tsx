@@ -25,7 +25,8 @@ export default function PhotoWallPreview() {
     const targetTitle = isMobile ? "2" : "1";
     getAlbums()
       .then((albums) => {
-        const target = albums.find((a) => a.title === targetTitle);
+        const populated = albums.filter((album) => album.photo_count > 0);
+        const target = populated.find((album) => album.title === targetTitle) ?? populated[0];
         if (!target) return;
         return getAlbumPhotos(target.id);
       })

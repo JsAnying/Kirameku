@@ -20,7 +20,7 @@ class Photo(SQLModel, table=True):
     __tablename__ = "photo"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    album_id: int = Field(foreign_key="album.id", index=True)
+    album_id: int = Field(foreign_key="album.id", ondelete="CASCADE", index=True)
     url: str = Field(max_length=500)
     caption: str = Field(default="", max_length=200)
     orientation: str = Field(default="landscape", max_length=20)

@@ -5,6 +5,7 @@ from app.deps import get_session
 from app.schemas import PostCreate, PostUpdate, PostOut, PostDetail
 from app.services import post_service
 from app.deps import get_current_user
+from app.utils.auth import get_optional_admin
 
 router = APIRouter(prefix="/api/posts", tags=["文章"])
 
@@ -17,17 +18,18 @@ def list_posts(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=200),
     session: Session = Depends(get_session),
+    admin: dict | None = Depends(get_optional_admin),
 ):
-    return post_service.get_posts(session, status, category, tag, page, size)
+    return post_service.get_posts(session, status if admin else "published", category, tag, page, size)
 
 
 @router.get("/count")
-def post_count(status: str | None = None, session: Session = Depends(get_session)):
-    return {"count": post_service.count_posts(session, status)}
+def post_count(status: str | None = None, session: Session = Depends(get_session), admin: dict | None = Depends(get_optional_admin)):
+    return {"count": post_service.count_posts(session, status if admin else "published")}
 
 
 @router.get("/detail/{post_id}", response_model=PostDetail)
-def get_post_by_id(post_id: int, session: Session = Depends(get_session)):
+def get_post_by_id(post_id: int, session: Session = Depends(get_session), _: dict = Depends(get_current_user)):
     return post_service.get_post_by_id(session, post_id)
 
 

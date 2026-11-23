@@ -15,6 +15,8 @@ export type UserResult = {
   };
 };
 
+export type RefreshTokenResult = UserResult;
+
 export type UserInfo = {
   avatar: string;
   username: string;
@@ -62,6 +64,6 @@ export const getMineLogs = (data?: object) => {
   return http.request<{
     code: number;
     message: string;
-    data?: { list: Array<any>; total?: number };
+    data?: { list: Array<any>; total?: number; pageSize?: number; currentPage?: number };
   }>("get", "/api/auth/me-logs", { data });
 };

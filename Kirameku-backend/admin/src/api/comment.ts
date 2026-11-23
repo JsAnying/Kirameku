@@ -8,6 +8,7 @@ export type CommentItem = {
   ip: string;
   status: string;
   created_at: string;
+  replies: CommentItem[];
   github_user: {
     id: number;
     login: string;

@@ -66,8 +66,12 @@ export default function PostDetailPage() {
   const [error, setError] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(() => {
     if (typeof window === "undefined") return new Set();
-    const saved = localStorage.getItem("liked_posts");
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    try {
+      const saved = JSON.parse(localStorage.getItem("liked_posts") || "[]");
+      return new Set<number>(Array.isArray(saved) ? saved.filter((id) => typeof id === "number") : []);
+    } catch {
+      return new Set<number>();
+    }
   });
   const contentRef = useRef<HTMLDivElement>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);

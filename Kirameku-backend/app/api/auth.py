@@ -8,6 +8,7 @@ from app.schemas import LoginRequest
 from app.config import ACCESS_TOKEN_EXPIRE_HOURS
 from app.deps import get_current_user
 from app.utils.auth import verify_password, create_token, hash_password
+from app.utils.media import image_url
 
 router = APIRouter(prefix="/api/auth", tags=["认证"])
 
@@ -27,8 +28,8 @@ def login(req: LoginRequest, session: Session = Depends(get_session)):
         "data": {
             "accessToken": token,
             "refreshToken": "",
-            "expires": expires.isoformat(),
-            "avatar": user.avatar or "",
+            "expires": expires.isoformat() + "Z",
+            "avatar": image_url(user.avatar or ""),
             "username": user.username,
             "nickname": user.nickname or user.username,
             "roles": ["admin"] if user.is_admin else [],
@@ -47,7 +48,7 @@ def me(user: dict = Depends(get_current_user), session: Session = Depends(get_se
         "code": 0,
         "message": "success",
         "data": {
-            "avatar": db_user.avatar or "",
+            "avatar": image_url(db_user.avatar or ""),
             "username": db_user.username,
             "nickname": db_user.nickname or db_user.username,
             "email": db_user.email or "",

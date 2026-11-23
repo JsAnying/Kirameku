@@ -39,7 +39,7 @@ export const siteConfig = {
   // 社交链接
   social: {
     github: "https://github.com/JsAnying",
-    gitee: "",
+    douyin: "https://v.douyin.com/4a1DJQSSkhU/", // 抖音个人主页分享链接
     google: "dzhen9415@gmail.com",
     email: "1628083088@qq.com",
     qq: "1638083088",

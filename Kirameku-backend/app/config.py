@@ -4,6 +4,12 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env", override=True)
+# 显式启用时，用生产配置覆盖基础 .env；本地默认不读取生产配置。
+if os.environ.get("KIRAMEKU_ENV") == "production":
+    production_env = BASE_DIR / ".env.production"
+    if not production_env.is_file():
+        raise RuntimeError("KIRAMEKU_ENV=production requires .env.production")
+    load_dotenv(production_env, override=True)
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 SECRET_KEY = os.environ["SECRET_KEY"]

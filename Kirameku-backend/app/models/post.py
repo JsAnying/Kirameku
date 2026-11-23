@@ -28,8 +28,8 @@ class Tag(SQLModel, table=True):
 class PostTag(SQLModel, table=True):
     __tablename__ = "post_tag"
 
-    post_id: int = Field(foreign_key="post.id", primary_key=True)
-    tag_id: int = Field(foreign_key="tag.id", primary_key=True)
+    post_id: int = Field(foreign_key="post.id", ondelete="CASCADE", primary_key=True)
+    tag_id: int = Field(foreign_key="tag.id", ondelete="CASCADE", primary_key=True)
 
 
 class Post(SQLModel, table=True):
@@ -41,7 +41,7 @@ class Post(SQLModel, table=True):
     description: str = Field(default="", max_length=500)
     content: str = Field(default="")
     cover: str = Field(default="", max_length=500)
-    category_id: Optional[int] = Field(default=None, foreign_key="category.id")
+    category_id: Optional[int] = Field(default=None, foreign_key="category.id", ondelete="SET NULL")
     status: str = Field(default="draft", max_length=20, index=True)
     is_pinned: bool = Field(default=False)
     views: int = Field(default=0)

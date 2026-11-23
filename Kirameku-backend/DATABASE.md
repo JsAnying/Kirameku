@@ -4,6 +4,16 @@
 > 建表脚本：`init_db.sql`
 > 执行方式：`psql -U postgres -d kirameku -f init_db.sql`
 
+## 已有数据库升级
+
+更新代码不会自动修改已有外键。部署本次修复时执行以下迁移，将外键删除规则与 `init_db.sql` 对齐，并重新计算已审核的说说评论数：
+
+```bash
+psql -U postgres -d kirameku -v ON_ERROR_STOP=1 -f migrations/20261103_fix_relations_and_comment_counts.sql
+```
+
+迁移在一个事务中执行，不删除现有业务数据。全新数据库使用当前 SQLModel 模型或 `init_db.sql` 建表即可。
+
 ## 概览
 
 共 14 张表，覆盖博客全部功能：文章、分类、标签、评论、留言板、说说、相册、项目展示、友链、站点配置。

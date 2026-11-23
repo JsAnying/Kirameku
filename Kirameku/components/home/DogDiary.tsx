@@ -5,17 +5,19 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function DogDiary() {
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   const fetchDiary = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("https://v2.xxapi.cn/api/dog");
+      const res = await fetch("/api/saying", { cache: "no-store" });
       const json = await res.json();
-      if (json.code === 200 && json.data) {
-        setText(json.data);
+      if (!res.ok || typeof json.text !== "string" || !json.text.trim()) {
+        setText(typeof json.error === "string" ? json.error : "获取失败，点击刷新重试~");
+        return;
       }
+      setText(json.text);
     } catch {
       setText("获取失败，点击刷新重试~");
     } finally {
@@ -24,7 +26,8 @@ export default function DogDiary() {
   }, []);
 
   useEffect(() => {
-    fetchDiary();
+    const timer = setTimeout(fetchDiary, 0);
+    return () => clearTimeout(timer);
   }, [fetchDiary]);
 
   return (
@@ -36,7 +39,7 @@ export default function DogDiary() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[10px] font-black text-pink-500 dark:text-pink-400 tracking-widest uppercase bg-white/50 dark:bg-slate-900/50 px-2 py-0.5 rounded-sm shadow-sm">
-              舔狗日记
+              一言
             </span>
             <button
               type="button"
@@ -87,7 +90,7 @@ export default function DogDiary() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  舔狗日记
+                  一言
                 </h3>
                 <button
                   type="button"

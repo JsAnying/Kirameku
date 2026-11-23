@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+:root {
+  --font-geist-mono: ui-monospace, monospace;
+}
+
 /* Tailwind CSS 4 class-based dark mode */
 @custom-variant dark (&:where(.dark, .dark *));
 

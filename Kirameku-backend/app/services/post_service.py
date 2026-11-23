@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 from sqlmodel import Session, select, func
 from fastapi import HTTPException
 
@@ -14,8 +13,8 @@ def _sync_tags(session: Session, post_id: int, tag_names: list[str]):
     for pt in old:
         session.delete(pt)
 
-    for name in tag_names:
-        name = name.strip()
+    session.flush()
+    for name in dict.fromkeys(name.strip() for name in tag_names):
         if not name:
             continue
         slug = name.lower().replace(" ", "-")
@@ -101,10 +100,13 @@ def get_posts(
         q = q.where(Post.status == status)
     if category:
         cat = session.exec(select(Category).where(Category.slug == category)).first()
-        if cat and cat.id is not None:
-            q = q.where(Post.category_id == cat.id)
+        if not cat or cat.id is None:
+            return []
+        q = q.where(Post.category_id == cat.id)
     if tag:
         t = session.exec(select(Tag).where(Tag.slug == tag)).first()
+        if not t or t.id is None:
+            return []
         if t and t.id is not None:
             post_ids = [
                 pt.post_id
@@ -122,7 +124,7 @@ def get_posts(
 
 def get_post_by_slug(session: Session, slug: str) -> dict:
     post = session.exec(select(Post).where(Post.slug == slug)).first()
-    if not post:
+    if not post or post.status != "published":
         raise HTTPException(status_code=404, detail="文章不存在")
     post.views += 1
     session.add(post)
@@ -207,6 +209,9 @@ def delete_post(session: Session, post_id: int):
     if not post:
         raise HTTPException(status_code=404, detail="文章不存在")
     cat_id = post.category_id
+    for post_tag in session.exec(select(PostTag).where(PostTag.post_id == post_id)).all():
+        session.delete(post_tag)
+    session.flush()
     session.delete(post)
     session.flush()
     _update_category_count(session, cat_id)
@@ -223,7 +228,7 @@ def count_posts(session: Session, status: str | None = None) -> int:
 
 def toggle_like(session: Session, post_id: int, unlike: bool = False) -> dict:
     post = session.get(Post, post_id)
-    if not post:
+    if not post or post.status != "published":
         raise HTTPException(404, "文章不存在")
     post.likes = max(0, post.likes + (-1 if unlike else 1))
     session.add(post)

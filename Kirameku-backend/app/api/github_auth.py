@@ -1,4 +1,6 @@
 import os
+import secrets
+from urllib.parse import urlencode
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -17,25 +19,33 @@ FRONTEND_ORIGIN = os.environ.get("FRONTEND_ORIGIN", "https://boke.hiromu.top")
 
 
 @router.get("/login")
-def github_login():
-    """跳转到 GitHub 授权页"""
+def github_login(request: Request):
+    """跳转到 GitHub 授权页，并绑定本次浏览器会话。"""
     if not GITHUB_CLIENT_ID:
         raise HTTPException(500, "未配置 GITHUB_CLIENT_ID")
-    url = (
-        f"https://github.com/login/oauth/authorize"
-        f"?client_id={GITHUB_CLIENT_ID}"
-        f"&scope=read:user"
-    )
-    return RedirectResponse(url)
+    state = secrets.token_urlsafe(32)
+    url = "https://github.com/login/oauth/authorize?" + urlencode({
+        "client_id": GITHUB_CLIENT_ID, "scope": "read:user", "state": state,
+    })
+    response = RedirectResponse(url)
+    response.set_cookie("github_oauth_state", state, max_age=600, httponly=True,
+                        secure=request.url.scheme == "https", samesite="lax",
+                        path="/api/auth/github/callback")
+    return response
 
 
 @router.get("/callback")
 def github_callback(
     code: str,
     request: Request,
+    state: str = "",
     session: Session = Depends(get_session),
 ):
     """GitHub 回调：用 code 换 token → 获取用户信息 → 生成 JWT"""
+    expected_state = request.cookies.get("github_oauth_state", "")
+    if not expected_state or not secrets.compare_digest(state, expected_state):
+        raise HTTPException(400, "GitHub 授权状态无效，请重新登录")
+
     # 1. code 换 access_token
     token_resp = httpx.post(
         "https://github.com/login/oauth/access_token",
@@ -100,7 +110,9 @@ def github_callback(
 
     # 5. 重定向回前端统一回调页，把 token 带上（通过 query param）
     redirect_url = f"{FRONTEND_ORIGIN}/auth/callback?token={token}"
-    return RedirectResponse(redirect_url)
+    response = RedirectResponse(redirect_url)
+    response.delete_cookie("github_oauth_state", path="/api/auth/github/callback")
+    return response
 
 
 @router.get("/me")
@@ -126,6 +138,8 @@ def _get_github_user(request: Request, session: Session) -> GitHubUser:
     token = auth[7:]
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "github":
+            raise ValueError("Invalid token type")
         user_id = int(payload["sub"])
     except Exception:
         raise HTTPException(401, "登录已过期，请重新登录")
@@ -143,6 +157,8 @@ def get_github_user_optional(request: Request, session: Session) -> GitHubUser |
     try:
         token = auth[7:]
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "github":
+            raise ValueError("Invalid token type")
         user_id = int(payload["sub"])
         return session.get(GitHubUser, user_id)
     except Exception:

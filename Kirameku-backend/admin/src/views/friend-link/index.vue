@@ -334,8 +334,7 @@ onMounted(() => onSearch());
             </div>
             <el-upload
               :show-file-list="false"
-              :http-request="() => {}"
-              :before-upload="() => false"
+              :auto-upload="false"
               :on-change="handleAvatarUpload"
               accept="image/*"
             >

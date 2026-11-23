@@ -357,8 +357,7 @@ onMounted(() => onSearch());
         drag
         multiple
         :show-file-list="false"
-        :http-request="() => {}"
-        :before-upload="() => false"
+        :auto-upload="false"
         :on-change="handleUpload"
         accept="image/*"
         class="mb-4"
@@ -423,7 +422,7 @@ onMounted(() => onSearch());
             </div>
             <!-- 方向标签 -->
             <el-tag
-              :type="photo.orientation === 'landscape' ? '' : 'warning'"
+              :type="photo.orientation === 'landscape' ? 'primary' : 'warning'"
               size="small"
               class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
             >

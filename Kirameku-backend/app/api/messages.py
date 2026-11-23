@@ -3,6 +3,7 @@ from sqlmodel import Session
 
 from app.deps import get_session
 from app.schemas import MessageCreate, MessageOut, MessageAdminUpdate
+from app.schemas.comment import MessageAdminOut
 from app.services import message_service
 from app.deps import get_current_user
 from app.api.github_auth import _get_github_user, get_github_user_optional
@@ -26,7 +27,7 @@ def message_count(session: Session = Depends(get_session)):
     return {"count": message_service.get_message_count(session, "approved")}
 
 
-@router.post("", response_model=dict)
+@router.post("", response_model=MessageOut)
 def create_message(
     data: MessageCreate,
     request: Request,
@@ -41,7 +42,7 @@ def create_message(
     return message_service.create_message(session, data, user, ip)
 
 
-@router.post("/{msg_id}/like")
+@router.post("/{msg_id}/like", response_model=MessageOut)
 def like_message(
     msg_id: int,
     session: Session = Depends(get_session),
@@ -49,7 +50,7 @@ def like_message(
     return message_service.toggle_like(session, msg_id, unlike=False)
 
 
-@router.post("/{msg_id}/unlike")
+@router.post("/{msg_id}/unlike", response_model=MessageOut)
 def unlike_message(
     msg_id: int,
     session: Session = Depends(get_session),
@@ -68,7 +69,7 @@ def admin_message_count(
     return {"count": message_service.get_message_count(session, status)}
 
 
-@router.get("/admin", response_model=list[MessageOut])
+@router.get("/admin", response_model=list[MessageAdminOut])
 def admin_list_messages(
     status: str | None = None,
     page: int = Query(1, ge=1),
@@ -76,7 +77,7 @@ def admin_list_messages(
     session: Session = Depends(get_session),
     _: dict = Depends(get_current_user),
 ):
-    return message_service.get_messages(session, status, page, size)
+    return message_service.get_messages(session, status, page, size, admin=True)
 
 
 @router.put("/{msg_id}/status")

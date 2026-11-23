@@ -10,6 +10,7 @@ from app.models.friend_link import FriendLink
 from app.models.site_config import SiteConfig
 from app.models.bookmark import BookmarkCategory, BookmarkSite
 from app.models.visitor import Visitor
+from app.models.feedback import Feedback
 
 __all__ = [
     "User",

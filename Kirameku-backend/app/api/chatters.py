@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from sqlmodel import Session
 
 from app.deps import get_session
@@ -9,6 +9,7 @@ from app.schemas import (
 from app.schemas.comment import CommentAdminUpdate
 from app.services import chatter_service
 from app.deps import get_current_user
+from app.utils.auth import get_optional_admin
 from app.api.github_auth import get_github_user_optional
 
 router = APIRouter(prefix="/api/chatters", tags=["说说"])
@@ -29,8 +30,9 @@ def list_chatters(
 def chatter_count(
     status: str = "published",
     session: Session = Depends(get_session),
+    admin: dict | None = Depends(get_optional_admin),
 ):
-    return {"count": chatter_service.count_chatters(session, status)}
+    return {"count": chatter_service.count_chatters(session, status if admin else "published")}
 
 
 @router.get("/{chatter_id}/comments", response_model=list[ChatterCommentOut])
@@ -123,8 +125,11 @@ def unlike_chatter_comment(comment_id: int, session: Session = Depends(get_sessi
 # ---- 动态路由 ----
 
 @router.get("/{chatter_id}", response_model=ChatterOut)
-def get_chatter(chatter_id: int, session: Session = Depends(get_session)):
-    return chatter_service.get_chatter_by_id(session, chatter_id)
+def get_chatter(chatter_id: int, session: Session = Depends(get_session), admin: dict | None = Depends(get_optional_admin)):
+    chatter = chatter_service.get_chatter_by_id(session, chatter_id)
+    if not admin and chatter["status"] != "published":
+        raise HTTPException(404, "说说不存在")
+    return chatter
 
 
 @router.post("/{chatter_id}/like")

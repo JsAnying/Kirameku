@@ -1,13 +1,15 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.utils.media import ImageContent, ImageUrl
+
 
 class PostCreate(BaseModel):
     title: str
     slug: str
     description: str = ""
-    content: str = ""
-    cover: str = ""
+    content: ImageContent = ""
+    cover: ImageUrl = ""
     category_id: int | None = None
     tags: list[str] = []
     status: str = "draft"
@@ -20,8 +22,8 @@ class PostUpdate(BaseModel):
     title: str | None = None
     slug: str | None = None
     description: str | None = None
-    content: str | None = None
-    cover: str | None = None
+    content: ImageContent | None = None
+    cover: ImageUrl | None = None
     category_id: int | None = None
     tags: list[str] | None = None
     status: str | None = None
@@ -35,7 +37,7 @@ class PostOut(BaseModel):
     title: str
     slug: str
     description: str
-    cover: str
+    cover: ImageUrl
     category: str = ""
     tags: list[str] = []
     status: str
@@ -50,4 +52,4 @@ class PostOut(BaseModel):
 
 
 class PostDetail(PostOut):
-    content: str
+    content: ImageContent

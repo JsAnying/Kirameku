@@ -484,8 +484,7 @@ onMounted(() => onSearch());
             <div class="flex flex-col gap-2 flex-1">
               <el-upload
                 :show-file-list="false"
-                :http-request="() => {}"
-                :before-upload="() => false"
+                :auto-upload="false"
                 :on-change="handleCatIconUpload"
                 accept="image/*"
               >
@@ -646,8 +645,7 @@ onMounted(() => onSearch());
             <div class="flex flex-col gap-2 flex-1">
               <el-upload
                 :show-file-list="false"
-                :http-request="() => {}"
-                :before-upload="() => false"
+                :auto-upload="false"
                 :on-change="handleSiteIconUpload"
                 accept="image/*"
               >

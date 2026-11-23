@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import type { TagProps } from "element-plus";
 import { message } from "@/utils/message";
 import {
   getProjects,
@@ -240,14 +241,14 @@ function getStatusLabel(status: string): string {
   return statusOptions.find(s => s.value === status)?.label ?? status;
 }
 
-function getStatusType(status: string): string {
-  const map: Record<string, string> = {
+function getStatusType(status: string): TagProps["type"] {
+  const map: Record<string, TagProps["type"]> = {
     developing: "warning",
     active: "success",
     archived: "info",
-    planned: ""
+    planned: "primary"
   };
-  return map[status] ?? "";
+  return map[status] ?? "primary";
 }
 
 onMounted(() => onSearch());
@@ -396,8 +397,7 @@ onMounted(() => onSearch());
             <div class="flex flex-col gap-2">
               <el-upload
                 :show-file-list="false"
-                :http-request="() => {}"
-                :before-upload="() => false"
+                :auto-upload="false"
                 :on-change="handleCoverUpload"
                 accept="image/*"
               >

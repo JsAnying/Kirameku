@@ -1,13 +1,15 @@
 from datetime import datetime
 from pydantic import BaseModel
 
+from app.utils.media import ImageUrl
+
 
 class ProjectCreate(BaseModel):
     name: str
     slug: str
     description: str = ""
     long_description: str = ""
-    cover_image: str = ""
+    cover_image: ImageUrl = ""
     tech_stack: list[str] = []
     link_github: str = ""
     link_gitee: str = ""
@@ -24,7 +26,7 @@ class ProjectUpdate(BaseModel):
     slug: str | None = None
     description: str | None = None
     long_description: str | None = None
-    cover_image: str | None = None
+    cover_image: ImageUrl | None = None
     tech_stack: list[str] | None = None
     link_github: str | None = None
     link_gitee: str | None = None
@@ -42,7 +44,7 @@ class ProjectOut(BaseModel):
     slug: str
     description: str
     long_description: str
-    cover_image: str
+    cover_image: ImageUrl
     tech_stack: list[str] = []
     link_github: str
     link_gitee: str

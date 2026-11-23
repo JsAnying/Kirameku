@@ -7,9 +7,9 @@ class Comment(SQLModel, table=True):
     __tablename__ = "comment"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    post_id: int = Field(foreign_key="post.id", index=True)
-    parent_id: Optional[int] = Field(default=None, foreign_key="comment.id")
-    github_user_id: Optional[int] = Field(default=None, foreign_key="github_user.id", index=True)
+    post_id: int = Field(foreign_key="post.id", ondelete="CASCADE", index=True)
+    parent_id: Optional[int] = Field(default=None, foreign_key="comment.id", ondelete="CASCADE")
+    github_user_id: Optional[int] = Field(default=None, foreign_key="github_user.id", ondelete="SET NULL", index=True)
     content: str
     likes: int = Field(default=0)
     ip: str = Field(default="", max_length=45)

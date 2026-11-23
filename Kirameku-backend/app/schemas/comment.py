@@ -42,12 +42,16 @@ class MessageOut(BaseModel):
     github_user_id: int | None
     parent_id: int | None
     content: str
-    ip: str = ""
     status: str
     likes: int
     created_at: datetime
     github_user: GitHubUserOut | None = None
     replies: list["MessageOut"] = []
+
+
+class MessageAdminOut(MessageOut):
+    ip: str = ""
+    replies: list["MessageAdminOut"] = []
 
 
 class MessageAdminUpdate(BaseModel):

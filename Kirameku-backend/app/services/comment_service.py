@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from fastapi import HTTPException
 
-from app.models import Comment, GitHubUser
+from app.models import Comment, GitHubUser, Post
 from app.schemas import CommentCreate
 
 
@@ -39,6 +39,9 @@ def _comment_to_dict(session: Session, c: Comment, include_ip: bool = False, fet
 
 def get_comments_by_post(session: Session, post_id: int) -> list[dict]:
     """获取文章的所有已审核评论，按层级组装。"""
+    post = session.get(Post, post_id)
+    if not post or post.status != "published":
+        raise HTTPException(404, "文章不存在")
     rows = list(
         session.exec(
             select(Comment)
@@ -84,9 +87,13 @@ def create_comment(
     if not github_user:
         raise HTTPException(401, "请先登录 GitHub")
 
+    post = session.get(Post, data.post_id)
+    if not post or post.status != "published":
+        raise HTTPException(404, "文章不存在")
+
     if data.parent_id:
         parent = session.get(Comment, data.parent_id)
-        if not parent:
+        if not parent or parent.post_id != data.post_id or parent.status != "approved":
             raise HTTPException(404, "被回复的评论不存在")
 
     comment = Comment(
@@ -115,7 +122,10 @@ def update_comment_status(session: Session, comment_id: int, status: str) -> dic
 
 def toggle_comment_like(session: Session, comment_id: int, unlike: bool = False) -> dict:
     c = session.get(Comment, comment_id)
-    if not c:
+    if not c or c.status != "approved":
+        raise HTTPException(404, "评论不存在")
+    post = session.get(Post, c.post_id)
+    if not post or post.status != "published":
         raise HTTPException(404, "评论不存在")
     c.likes = max(0, c.likes + (-1 if unlike else 1))
     session.add(c)

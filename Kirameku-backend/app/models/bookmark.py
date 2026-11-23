@@ -19,7 +19,7 @@ class BookmarkSite(SQLModel, table=True):
     __tablename__ = "bookmark_site"
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    category_id: int = Field(foreign_key="bookmark_category.id")
+    category_id: int = Field(foreign_key="bookmark_category.id", ondelete="CASCADE")
     name: str = Field(max_length=100)
     url: str = Field(max_length=300)
     icon: str = Field(default="", max_length=500)

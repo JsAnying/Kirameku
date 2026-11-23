@@ -72,8 +72,12 @@ export default function PostComments({ postId }: { postId: number }) {
   const [expandedReplies, setExpandedReplies] = useState<Set<number>>(new Set());
   const [likedIds, setLikedIds] = useState<Set<number>>(() => {
     if (typeof window === "undefined") return new Set();
-    const saved = localStorage.getItem("liked_comments");
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    try {
+      const saved = JSON.parse(localStorage.getItem("liked_comments") || "[]");
+      return new Set<number>(Array.isArray(saved) ? saved.filter((id) => typeof id === "number") : []);
+    } catch {
+      return new Set<number>();
+    }
   });
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
